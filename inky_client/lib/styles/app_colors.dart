@@ -6,6 +6,6 @@ class AppStyles {
   static const Color secondaryColor = Color(0xFFE0E0E0);
   static const Color textColor = Colors.white;
 
-  static const Color avatarAnonBackgroundColor = Colors.white;
+  static const Color avatarAnonBackgroundColor = Color(0xF4F1EAFF);
   static const Color avatarAnonColor = Color(0x6B6B6BFF);
 }

@@ -71,30 +71,31 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildBookItem({
-    required String title,
-    required String author,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.greenAccent,
-                borderRadius: BorderRadius.circular(6),
-              ),
+Widget _buildBookItem({
+  required String title,
+  required String author,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.grey,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppStyles.avatarAnonBackgroundColor,
+              borderRadius: BorderRadius.circular(6),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Text(
             title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -103,8 +104,11 @@ class HomePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
+        ),
+        const SizedBox(height: 4),
+        Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Text(
             author,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -112,11 +116,12 @@ class HomePage extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
+        ),
+        const SizedBox(height: 8),
+      ],
+    ),
+  );
+}
 
   Drawer _buildDrawer(BuildContext context) {
     return Drawer(
