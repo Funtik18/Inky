@@ -17,13 +17,22 @@ class DatabaseService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  static Future<void> addBook() async {
+  static Future<void> addBook({
+    required String author,
+    required String title,
+    required String annotation,
+    required String notes,
+    required String coverUrl,
+    required bool isAdult,
+    }) async {
     await Supabase.instance.client.from('books').insert({
-      'author': 'Me',
-      'title': 'My Book',
-      'description': 'Test description',
-      'cover_url': 'https://example.com/cover.jpg',
-      'file_url': 'https://example.com/book.epub',
+      'author': author,
+      'title': title,
+      'annotation': annotation,
+      'notes': notes,
+      'cover_url': coverUrl,
+      'is_adult': isAdult,
+      //'file_url': 'https://example.com/book.epub',
     });
   }
 
