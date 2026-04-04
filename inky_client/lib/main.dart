@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'services/database_service.dart';
-import 'styles/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

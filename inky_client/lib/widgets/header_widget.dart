@@ -3,7 +3,9 @@ import '../styles/app_colors.dart';
 import 'avatar_widget.dart';
 
 class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
-  const HeaderWidget({super.key});
+  const HeaderWidget({super.key, this.onTap});
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +16,7 @@ class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
           padding: const EdgeInsets.only(right: 16),
           child: AvatarWidget(
             radius: 20,
-            onTap: () {
+            onTap: onTap ?? () {
               Scaffold.of(context).openEndDrawer();
             },
           ),
