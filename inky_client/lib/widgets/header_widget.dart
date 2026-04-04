@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../styles/app_colors.dart';
+import 'avatar_widget.dart';
 
 class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   const HeaderWidget({super.key});
@@ -7,13 +8,16 @@ class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: AppStyles.primaryColor,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () {
-            Scaffold.of(context).openEndDrawer();
-          },
+        Padding(
+          padding: const EdgeInsets.only(right: 16),
+          child: AvatarWidget(
+            radius: 20,
+            onTap: () {
+              Scaffold.of(context).openEndDrawer();
+            },
+          ),
         ),
       ],
     );
