@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
-import 'services/db_loader.dart';
+import 'services/database_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
