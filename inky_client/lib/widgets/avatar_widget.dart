@@ -13,7 +13,7 @@ class AvatarWidget extends StatelessWidget {
       onTap: onTap,
       child: CircleAvatar(
         radius: radius,
-        backgroundColor: AppStyles.backgroundColor,
+        backgroundColor: AppStyles.avatarAnonBackgroundColor,
         child: Icon(Icons.person, color: AppStyles.avatarAnonColor),
       ),
     );
