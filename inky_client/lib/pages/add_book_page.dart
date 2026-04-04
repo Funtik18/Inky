@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import '../services/bucket_service.dart';
 import '../services/database_service.dart';
 import '../styles/app_colors.dart';
 
@@ -82,6 +83,13 @@ class _AddBookPageState extends State<AddBookPage> {
         coverUrl: _coverImage != null ? _coverImage!.path : '',
         isAdult: _isAdultContent
         );
+
+      /*await BucketService.uploadFile(
+        presignedUrl: uploadUrlFromBackend,
+        file: File('/path/to/book.epub'),
+        contentType: 'application/epub+zip',
+      );*/
+
       Navigator.of(context).pop(); // Go back to previous page
     } else {
       // Show error message

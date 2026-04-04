@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:inky_client/services/database_service.dart';
 import '../styles/app_colors.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/header_widget.dart';
