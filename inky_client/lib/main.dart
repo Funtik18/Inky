@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
+import 'services/db_loader.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await DatabaseService.initializeSupabase();
+  var books = await DatabaseService.loadBooks();
+  print(books);
+
   runApp(const MyApp());
 }
 

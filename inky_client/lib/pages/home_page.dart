@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inky_client/services/catalog_loader.dart';
+import 'package:inky_client/services/cloud_loader.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
