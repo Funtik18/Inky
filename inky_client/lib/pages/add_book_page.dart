@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import '../services/bucket_service.dart';
 import '../services/database_service.dart';
+import '../services/lamda_service.dart';
 import '../styles/app_colors.dart';
 
 class AddBookPage extends StatefulWidget {
@@ -70,32 +71,53 @@ class _AddBookPageState extends State<AddBookPage> {
     );
   }
 
-  void _addBook() {
+  Future<void> _addBook() async {
     final title = _titleController.text.trim();
     final annotation = _annotationController.text.trim();
     final notes = _notesController.text.trim();
-    if (title.isNotEmpty && annotation.isNotEmpty) {
-      DatabaseService.addBook(
-        author: "Admin",
-        title: title,
-        annotation: annotation,
-        notes: notes,
-        coverUrl: _coverImage != null ? _coverImage!.path : '',
-        isAdult: _isAdultContent
-        );
 
-      /*await BucketService.uploadFile(
-        presignedUrl: uploadUrlFromBackend,
-        file: File('/path/to/book.epub'),
-        contentType: 'application/epub+zip',
-      );*/
-
-      Navigator.of(context).pop(); // Go back to previous page
-    } else {
-      // Show error message
+    if (title.isEmpty || annotation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пожалуйста, заполните все поля')),
+        const SnackBar(content: Text('Пожалуйста, заполните все обязательные поля')),
       );
+      return;
+    }
+
+    String coverUrl = '';
+    if (_coverImage != null) {
+      final response = await LambdaService.createCoverUploadUrl(
+        fileName: 'example.jpg',
+        contentType: 'image/jpeg',
+      ).catchError((error) {
+        print('Error getting presigned URL: $error');
+      });
+      final presignedUrl = response['upload_url'];
+      final fileUrl = response['public_url'];
+      final objectKey = response['object_key'];
+      final contentType = response['content_type'];
+
+      coverUrl = fileUrl;
+
+      await BucketService.uploadFile(
+        presignedUrl: presignedUrl,
+        file: _coverImage!,
+        contentType: 'image/jpeg',
+      ).catchError((error) {
+        print('Error uploading cover: $error');
+      });
+    }
+
+    await DatabaseService.addBook(
+      author: 'Admin',
+      title: title,
+      annotation: annotation,
+      notes: notes,
+      coverUrl: coverUrl,
+      isAdult: _isAdultContent,
+    );
+
+    if (mounted) {
+      Navigator.of(context).pop();
     }
   }
 
@@ -148,7 +170,7 @@ class _AddBookPageState extends State<AddBookPage> {
               ),
               _buildTextFieldWithCounter(
                 controller: _titleController,
-                label: 'Название',
+                label: 'Название*',
                 hint: 'Название',
                 maxLength: 150,
               ),
