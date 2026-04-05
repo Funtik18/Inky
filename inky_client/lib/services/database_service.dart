@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DatabaseService {
@@ -17,6 +20,20 @@ class DatabaseService {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  static Future<Uint8List?> loadCoverImage(String coverUrl) async {
+    final normalizedUrl = coverUrl.trim();
+    if (normalizedUrl.isEmpty) {
+      return null;
+    }
+
+    final response = await http.get(Uri.parse(normalizedUrl));
+    if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+      return null;
+    }
+
+    return response.bodyBytes;
+  }
+
   static Future<void> addBook({
     required String author,
     required String title,
@@ -24,7 +41,7 @@ class DatabaseService {
     required String notes,
     required String coverUrl,
     required bool isAdult,
-    }) async {
+  }) async {
     await Supabase.instance.client.from('books').insert({
       'author': author,
       'title': title,

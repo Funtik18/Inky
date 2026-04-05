@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import '../services/database_service.dart';
 import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
@@ -43,9 +45,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildHeader() {
     return SizedBox(
       child: DrawerHeader(
-        decoration: const BoxDecoration(
-          color: AppStyles.headerColor,
-        ),
+        decoration: const BoxDecoration(color: AppStyles.headerColor),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -92,9 +92,7 @@ class _HomePageState extends State<HomePage> {
         final books = snapshot.data ?? [];
 
         if (books.isEmpty) {
-          return const Center(
-            child: Text('Книг пока нет'),
-          );
+          return const Center(child: Text('Книг пока нет'));
         }
 
         return Padding(
@@ -113,6 +111,7 @@ class _HomePageState extends State<HomePage> {
               return _buildBookItem(
                 title: (book['title'] ?? '').toString(),
                 author: (book['author'] ?? '').toString(),
+                coverUrl: (book['cover_url'] ?? '').toString(),
               );
             },
           ),
@@ -121,7 +120,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBookItem({required String title, required String author}) {
+  Widget _buildBookItem({
+    required String title,
+    required String author,
+    required String coverUrl,
+  }) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey,
@@ -133,10 +136,23 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
-              child: Image.asset(
-                AppAssets.blankCover,
-                width: double.infinity,
-                fit: BoxFit.cover,
+              child: FutureBuilder<Uint8List?>(
+                future: DatabaseService.loadCoverImage(coverUrl),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    return Image.memory(
+                      snapshot.data!,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    );
+                  }
+
+                  return Image.asset(
+                    AppAssets.blankCover,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  );
+                },
               ),
             ),
           ),
@@ -147,10 +163,7 @@ class _HomePageState extends State<HomePage> {
               title,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 4),
@@ -160,9 +173,7 @@ class _HomePageState extends State<HomePage> {
               author,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-              ),
+              style: const TextStyle(fontSize: 12),
             ),
           ),
           const SizedBox(height: 8),
