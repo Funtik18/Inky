@@ -123,7 +123,7 @@ Widget _buildBookItem({
   );
 }
 
-  Drawer _buildDrawer(BuildContext context) {
+Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -133,6 +133,7 @@ Widget _buildBookItem({
             leading: const Icon(Icons.add),
             title: const Text('Добавить произведение'),
             onTap: () {
+              Navigator.of(context).pop();
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AddBookPage()),
