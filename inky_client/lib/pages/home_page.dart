@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppStyles.backgroundColor,
       appBar: HeaderWidget(),
       body: _buildBody(),
       endDrawer: _buildDrawer(context),
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage> {
     return SizedBox(
       child: DrawerHeader(
         decoration: const BoxDecoration(
-          color: AppStyles.primaryColor,
+          color: AppStyles.headerColor,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -60,7 +61,7 @@ class _HomePageState extends State<HomePage> {
             const Text(
               'Имя Фамилия',
               style: TextStyle(
-                color: AppStyles.textColor,
+                color: AppStyles.lightTextColor,
                 fontSize: 16,
               ),
             ),
@@ -129,11 +130,12 @@ class _HomePageState extends State<HomePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: AppStyles.avatarAnonBackgroundColor,
-                borderRadius: BorderRadius.circular(6),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'assets/blank.png',
+                width: double.infinity,
+                fit: BoxFit.cover,
               ),
             ),
           ),
