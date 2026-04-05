@@ -4,9 +4,8 @@ import 'package:flutter/services.dart';
 import '../services/database_service.dart';
 import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
-import '../widgets/avatar_widget.dart';
 import '../widgets/header_widget.dart';
-import 'add_book_page.dart';
+import 'home_page_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,10 +23,28 @@ class _HomePageState extends State<HomePage> {
     _booksFuture = DatabaseService.loadBooks();
   }
 
-  void _reloadBooks() {
+  Future<void> _reloadBooks() async {
     setState(() {
       _booksFuture = DatabaseService.loadBooks();
     });
+
+    await _booksFuture;
+  }
+
+  Widget _buildRefreshWrapper({required Widget child}) {
+    return RefreshIndicator(onRefresh: _reloadBooks, child: child);
+  }
+
+  Widget _buildScrollableMessage(String text) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.7,
+          child: Center(child: Text(text)),
+        ),
+      ],
+    );
   }
 
   @override
@@ -36,39 +53,9 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppStyles.backgroundColor,
       appBar: HeaderWidget(),
       body: _buildBody(),
-      endDrawer: _buildDrawer(context),
+      endDrawer: HomePageDrawer(onBookAdded: () => _reloadBooks()),
       drawerEnableOpenDragGesture: true,
       endDrawerEnableOpenDragGesture: true,
-    );
-  }
-
-  Widget _buildHeader() {
-    return SizedBox(
-      child: DrawerHeader(
-        decoration: const BoxDecoration(color: AppStyles.headerColor),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: AvatarWidget(
-                onTap: () {
-                  //TODO: Implement profile tap action
-                },
-                radius: 30,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Имя Фамилия',
-              style: TextStyle(
-                color: AppStyles.textAboveHeaderColor,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -81,10 +68,18 @@ class _HomePageState extends State<HomePage> {
         }
 
         if (snapshot.hasError) {
-          return Center(
-            child: Padding(
+          return _buildRefreshWrapper(
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
-              child: Text('Ошибка загрузки книг: ${snapshot.error}'),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.7,
+                  child: Center(
+                    child: Text('Ошибка загрузки книг: ${snapshot.error}'),
+                  ),
+                ),
+              ],
             ),
           );
         }
@@ -92,28 +87,33 @@ class _HomePageState extends State<HomePage> {
         final books = snapshot.data ?? [];
 
         if (books.isEmpty) {
-          return const Center(child: Text('Книг пока нет'));
+          return _buildRefreshWrapper(
+            child: _buildScrollableMessage('Книг пока нет'),
+          );
         }
 
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: GridView.builder(
-            itemCount: books.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 5,
-              mainAxisSpacing: 5,
-              childAspectRatio: 0.5,
-            ),
-            itemBuilder: (context, index) {
-              final book = books[index];
+        return _buildRefreshWrapper(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemCount: books.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 5,
+                mainAxisSpacing: 5,
+                childAspectRatio: 0.5,
+              ),
+              itemBuilder: (context, index) {
+                final book = books[index];
 
-              return _buildBookItem(
-                title: (book['title'] ?? '').toString(),
-                author: (book['author'] ?? '').toString(),
-                coverUrl: (book['cover_url'] ?? '').toString(),
-              );
-            },
+                return _buildBookItem(
+                  title: (book['title'] ?? '').toString(),
+                  author: (book['author'] ?? '').toString(),
+                  coverUrl: (book['cover_url'] ?? '').toString(),
+                );
+              },
+            ),
           ),
         );
       },
@@ -127,7 +127,7 @@ class _HomePageState extends State<HomePage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey,
+        color: AppStyles.cardColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -177,64 +177,6 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Drawer _buildDrawer(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          _buildHeader(),
-          ListTile(
-            leading: const Icon(Icons.add),
-            title: const Text('Добавить произведение'),
-            onTap: () async {
-              Navigator.of(context).pop();
-              final wasAdded = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(builder: (context) => const AddBookPage()),
-              );
-
-              if (wasAdded == true) {
-                _reloadBooks();
-              }
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Мои книги'),
-            onTap: () {
-              // Handle my books tap
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.favorite),
-            title: const Text('Избранное'),
-            onTap: () {
-              // Handle favorites tap
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Настройки'),
-            onTap: () {
-              // Handle settings tap
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Выйти'),
-            onTap: () {
-              // Handle logout tap
-            },
-          ),
         ],
       ),
     );
