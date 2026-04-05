@@ -8,11 +8,11 @@ class DatabaseService {
     );
   }
 
-  static Future<List<Map<String, dynamic>>> loadBooks() async {
+  static Future<List<Map<String, dynamic>>> loadBooks({bool isAscending=true}) async {
     final data = await Supabase.instance.client
         .from('books')
         .select()
-        .order('created_at');
+        .order('created_at', ascending: isAscending);
 
     return List<Map<String, dynamic>>.from(data);
   }

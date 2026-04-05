@@ -18,12 +18,12 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
   @override
   void initState() {
     super.initState();
-    _booksFuture = DatabaseService.loadBooks();
+    _booksFuture = DatabaseService.loadBooks(isAscending: false);
   }
 
   Future<void> _reloadBooks() async {
     setState(() {
-      _booksFuture = DatabaseService.loadBooks();
+      _booksFuture = DatabaseService.loadBooks(isAscending: false);
     });
 
     await _booksFuture;
