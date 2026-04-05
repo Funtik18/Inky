@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../styles/app_colors.dart';
 import '../widgets/avatar_widget.dart';
 import 'add_book_page.dart';
+import 'my_library_page.dart';
 
 class HomePageDrawer extends StatelessWidget {
   const HomePageDrawer({super.key, this.onBookAdded});
@@ -34,9 +35,14 @@ class HomePageDrawer extends StatelessWidget {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.book),
-            title: const Text('Мои книги'),
+            title: const Text('Мои произведения'),
             onTap: () {
-              // Handle my books tap
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MyLibraryPage()),
+              );
+              
             },
           ),
           const Divider(height: 1),
