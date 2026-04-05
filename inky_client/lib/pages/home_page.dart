@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/database_service.dart';
 import '../styles/app_colors.dart';
 import '../widgets/book_card_widget.dart';
-import '../widgets/app_bar_avatar_widget.dart';
+import '../widgets/home_page_app_bar_widget.dart';
 import 'home_page_drawer.dart';
 
 class HomePage extends StatefulWidget {
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
-      appBar: AppBarAvatarWidget(title: 'Inky'),
+      appBar: HomePageAppBarWidget(title: 'Inky'),
       body: _buildBody(),
       endDrawer: HomePageDrawer(onBookAdded: () => _reloadBooks()),
       drawerEnableOpenDragGesture: true,
