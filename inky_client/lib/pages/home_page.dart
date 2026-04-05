@@ -63,60 +63,95 @@ class _HomePageState extends State<HomePage> {
         }
 
         final books = (snapshot.data ?? []).reversed.take(10).toList();
-
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
-          children: [
-            _buildSectionHeader(),
-            const SizedBox(height: 16),
-            if (books.isEmpty)
-              _buildEmptyState()
-            else
-              SizedBox(
-                height: 280,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: books.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final book = books[index];
-                    return SizedBox(
-                      width: 150,
-                      child: BookCardWidget(
-                        title: (book['title'] ?? '').toString(),
-                        author: (book['author'] ?? '').toString(),
-                        coverUrl: (book['cover_url'] ?? '').toString(),
-                      ),
-                    );
-                  },
-                ),
-              ),
-          ],
-        );
+        return _buildBooksContent(books);
       },
     );
   }
 
-  Widget _buildSectionHeader() {
+  Widget _buildBooksContent(List<Map<String, dynamic>> books) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+      children: [
+        _buildBookSection(
+          title: 'Популярное',
+          subtitle: 'Самое популярное за сегодня',
+          emptyText: 'Пока нет популярных произведений',
+          books: books,
+        ),
+        const SizedBox(height: 24),
+        _buildBookSection(
+          title: 'Новые поступления',
+          subtitle: 'Только что опубликованные произведения',
+          emptyText: 'Пока нет новых поступлений',
+          books: books,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBookSection({
+    required String title,
+    required String subtitle,
+    required String emptyText,
+    required List<Map<String, dynamic>> books,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(title: title, subtitle: subtitle),
+        const SizedBox(height: 16),
+        if (books.isEmpty)
+          _buildEmptyState(emptyText)
+        else
+          SizedBox(
+            height: 280,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: books.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final book = books[index];
+                return SizedBox(
+                  width: 150,
+                  child: BookCardWidget(
+                    title: (book['title'] ?? '').toString(),
+                    author: (book['author'] ?? '').toString(),
+                    coverUrl: (book['cover_url'] ?? '').toString(),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String title,
+    required String subtitle,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Новые поступления',
-                style: TextStyle(
+                title,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppStyles.textColor,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Только что опубликованные произведения',
-                style: TextStyle(fontSize: 13, color: AppStyles.subtitleColor),
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppStyles.subtitleColor,
+                ),
               ),
             ],
           ),
@@ -126,17 +161,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       decoration: BoxDecoration(
         color: AppStyles.cardColor,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Text(
-        'Пока нет новых поступлений',
+      child: Text(
+        text,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 14, color: AppStyles.subtitleColor),
+        style: const TextStyle(fontSize: 14, color: AppStyles.subtitleColor),
       ),
     );
   }
