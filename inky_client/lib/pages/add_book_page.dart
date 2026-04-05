@@ -5,6 +5,7 @@ import '../services/bucket_service.dart';
 import '../services/database_service.dart';
 import '../services/lamda_service.dart';
 import '../styles/app_colors.dart';
+import '../utils/image_utils.dart';
 
 class AddBookPage extends StatefulWidget {
   const AddBookPage({super.key});
@@ -21,6 +22,7 @@ class _AddBookPageState extends State<AddBookPage> {
 
   final ImagePicker _picker = ImagePicker();
   File? _coverImage;
+  String? _coverImageName;
 
   @override
   void dispose() {
@@ -83,11 +85,19 @@ class _AddBookPageState extends State<AddBookPage> {
       return;
     }
 
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Пожалуйста подождите, добавляем произведение...')),
+    );
+
     String coverUrl = '';
     if (_coverImage != null) {
       final response = await LambdaService.createCoverUploadUrl(
-        fileName: 'example.jpg',
-        contentType: 'image/jpeg',
+        fileName: _coverImageName ?? 'cover.jpg',
+        contentType: resolveImageContentType(_coverImageName ?? 'cover.jpg'),
       ).catchError((error) {
         print('Error getting presigned URL: $error');
       });
@@ -104,6 +114,10 @@ class _AddBookPageState extends State<AddBookPage> {
         contentType: 'image/jpeg',
       ).catchError((error) {
         print('Error uploading cover: $error');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading cover: $error')),
+        );
       });
     }
 
@@ -114,24 +128,17 @@ class _AddBookPageState extends State<AddBookPage> {
       notes: notes,
       coverUrl: coverUrl,
       isAdult: _isAdultContent,
+    ).catchError((error) {
+      print('Error adding book to database: $error');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding book to database: $error')),
+      );
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Загрузка завершена!')),
     );
-
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  Future<void> _setPicture() async {
-      final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 85,
-    );
-
-    if (pickedFile != null) {
-      setState(() {
-        _coverImage = File(pickedFile.path);
-      });
-    }
   }
 
   @override
@@ -211,5 +218,18 @@ class _AddBookPageState extends State<AddBookPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _setPicture() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile != null) {
+      setState(() {
+        _coverImage = File(pickedFile.path);
+        _coverImageName = pickedFile.name;
+      });
+    }
   }
 }
