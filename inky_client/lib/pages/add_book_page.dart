@@ -19,6 +19,7 @@ class _AddBookPageState extends State<AddBookPage> {
   final TextEditingController _annotationController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   bool _isAdultContent = false;
+  bool _isSubmitting = false;
 
   final ImagePicker _picker = ImagePicker();
   File? _coverImage;
@@ -48,10 +49,7 @@ class _AddBookPageState extends State<AddBookPage> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(label),
-                Text('${value.text.length}/$maxLength'),
-              ],
+              children: [Text(label), Text('${value.text.length}/$maxLength')],
             ),
             const SizedBox(height: 8),
             TextField(
@@ -59,9 +57,15 @@ class _AddBookPageState extends State<AddBookPage> {
               maxLength: maxLength,
               minLines: minLines,
               maxLines: maxLines,
-              buildCounter: (context, {required currentLength, required isFocused, maxLength}) {
-                return const Text('');
-              },
+              buildCounter:
+                  (
+                    context, {
+                    required currentLength,
+                    required isFocused,
+                    maxLength,
+                  }) {
+                    return const Text('');
+                  },
               decoration: InputDecoration(
                 border: const OutlineInputBorder(),
                 hintText: hint,
@@ -74,71 +78,81 @@ class _AddBookPageState extends State<AddBookPage> {
   }
 
   Future<void> _addBook() async {
+    if (_isSubmitting) {
+      return;
+    }
+
     final title = _titleController.text.trim();
     final annotation = _annotationController.text.trim();
     final notes = _notesController.text.trim();
 
     if (title.isEmpty || annotation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пожалуйста, заполните все обязательные поля')),
+        const SnackBar(
+          content: Text('Пожалуйста, заполните все обязательные поля'),
+        ),
       );
       return;
     }
 
-    if (mounted) {
-      Navigator.of(context).pop();
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Пожалуйста подождите, добавляем произведение...')),
-    );
-
-    String coverUrl = '';
-    if (_coverImage != null) {
-      final response = await LambdaService.createCoverUploadUrl(
-        fileName: _coverImageName ?? 'cover.jpg',
-        contentType: resolveImageContentType(_coverImageName ?? 'cover.jpg'),
-      ).catchError((error) {
-        print('Error getting presigned URL: $error');
-      });
-      final presignedUrl = response['upload_url'];
-      final fileUrl = response['public_url'];
-      final objectKey = response['object_key'];
-      final contentType = response['content_type'];
-
-      coverUrl = fileUrl;
-
-      await BucketService.uploadFile(
-        presignedUrl: presignedUrl,
-        file: _coverImage!,
-        contentType: 'image/jpeg',
-      ).catchError((error) {
-        print('Error uploading cover: $error');
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading cover: $error')),
-        );
-      });
-    }
-
-    await DatabaseService.addBook(
-      author: 'Admin',
-      title: title,
-      annotation: annotation,
-      notes: notes,
-      coverUrl: coverUrl,
-      isAdult: _isAdultContent,
-    ).catchError((error) {
-      print('Error adding book to database: $error');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding book to database: $error')),
-      );
+    setState(() {
+      _isSubmitting = true;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Загрузка завершена!')),
-    );
+    try {
+      String coverUrl = '';
+      if (_coverImage != null) {
+        final contentType = resolveImageContentType(
+          _coverImageName ?? 'cover.jpg',
+        );
+        final response = await LambdaService.createCoverUploadUrl(
+          fileName: _coverImageName ?? 'cover.jpg',
+          contentType: contentType,
+        );
+        final presignedUrl = response['upload_url'] as String;
+        final fileUrl = response['public_url'] as String;
+
+        coverUrl = fileUrl;
+
+        await BucketService.uploadFile(
+          presignedUrl: presignedUrl,
+          file: _coverImage!,
+          contentType: contentType,
+        );
+      }
+
+      await DatabaseService.addBook(
+        author: 'Admin',
+        title: title,
+        annotation: annotation,
+        notes: notes,
+        coverUrl: coverUrl,
+        isAdult: _isAdultContent,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Произведение добавлено')));
+      Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка при добавлении произведения: $error')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -149,72 +163,87 @@ class _AddBookPageState extends State<AddBookPage> {
         backgroundColor: AppStyles.primaryColor,
       ),
       body: SafeArea(
-        child:SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-                Container(
-                width: 200,
-                height: 256,
-                child: _coverImage != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.file(
-                          _coverImage!,
-                          fit: BoxFit.cover,
-                        ),
-                      )
-                    : Container(
-                        color: Colors.grey,
-                        child: const Center(
-                          child: Text('Обложка'),
-                        ),
-                      ),
+        child: Stack(
+          children: [
+            AbsorbPointer(
+              absorbing: _isSubmitting,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      height: 256,
+                      child: _coverImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                _coverImage!,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : Container(
+                              color: Colors.grey,
+                              child: const Center(child: Text('Обложка')),
+                            ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _isSubmitting ? null : _setPicture,
+                      child: const Text('Изменить обложку'),
+                    ),
+                    _buildTextFieldWithCounter(
+                      controller: _titleController,
+                      label: 'Название*',
+                      hint: 'Название',
+                      maxLines: 1,
+                      maxLength: 150,
+                    ),
+                    _buildTextFieldWithCounter(
+                      controller: _annotationController,
+                      label: 'Аннотация',
+                      hint: 'О чём произведение, кратко.',
+                      maxLength: 1000,
+                      minLines: 5,
+                      maxLines: 15,
+                    ),
+                    _buildTextFieldWithCounter(
+                      controller: _notesController,
+                      label: 'Примечания',
+                      hint: 'Ваш комментарий по поводу этой работы, процесса её создания и планов на будущее.',
+                      maxLength: 1000,
+                      minLines: 3,
+                      maxLines: 10,
+                    ),
+                    CheckboxListTile(
+                      title: const Text('Для взрослых (18+)'),
+                      value: _isAdultContent,
+                      onChanged: _isSubmitting
+                          ? null
+                          : (value) {
+                              setState(() {
+                                _isAdultContent = value ?? false;
+                              });
+                            },
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      onPressed: _isSubmitting ? null : _addBook,
+                      child: const Text('Добавить произведение'),
+                    ),
+                  ],
+                ),
               ),
-              ElevatedButton(
-                onPressed: _setPicture,
-                child: const Text('Изменить обложку'),
+            ),
+            if (_isSubmitting)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Colors.black26,
+                  child: Center(child: CircularProgressIndicator()),
+                ),
               ),
-              _buildTextFieldWithCounter(
-                controller: _titleController,
-                label: 'Название*',
-                hint: 'Название',
-                maxLength: 150,
-              ),
-              _buildTextFieldWithCounter(
-                controller: _annotationController,
-                label: 'Аннотация',
-                hint: 'О чём произведение, кратко.',
-                maxLength: 1000,
-                minLines: 5,
-                maxLines: 15,
-              ),
-              _buildTextFieldWithCounter(
-                controller: _notesController,
-                label: 'Примечания',
-                hint: 'Ваш комментарий по поводу этой работы, процесса её создания и планов на будущее.',
-                maxLength: 1000,
-                minLines: 3,
-                maxLines: 10,
-              ),
-              CheckboxListTile(
-                title: const Text('Для взрослых (18+)'),
-                value: _isAdultContent,
-                onChanged: (value) {
-                  setState(() {
-                    _isAdultContent = value ?? false;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _addBook,
-                child: const Text('Добавить произведение'),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
