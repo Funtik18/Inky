@@ -20,20 +20,6 @@ class DatabaseService {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  static Future<Uint8List?> loadCoverImage(String coverUrl) async {
-    final normalizedUrl = coverUrl.trim();
-    if (normalizedUrl.isEmpty) {
-      return null;
-    }
-
-    final response = await http.get(Uri.parse(normalizedUrl));
-    if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
-      return null;
-    }
-
-    return response.bodyBytes;
-  }
-
   static Future<void> addBook({
     required String author,
     required String title,

@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 class BucketService {
-  static Future<Map<String, dynamic>> loadCatalog() async {
+  /*static Future<Map<String, dynamic>> loadCatalog() async {
     final response = await http.get(
       //Uri.parse('https://inky.s3.amazonaws.com/catalog/books.json'), 
       Uri.parse('https://d9bjv0wyrf9ss.cloudfront.net/catalog/books.json'),
@@ -14,6 +14,20 @@ class BucketService {
     }
 
     return jsonDecode(response.body) as Map<String, dynamic>;
+  }*/
+
+  static Future<Uint8List?> loadCoverImage(String coverUrl) async {
+    final normalizedUrl = coverUrl.trim();
+    if (normalizedUrl.isEmpty) {
+      return null;
+    }
+
+    final response = await http.get(Uri.parse(normalizedUrl));
+    if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+      return null;
+    }
+
+    return response.bodyBytes;
   }
 
   static Future<void> uploadFile({

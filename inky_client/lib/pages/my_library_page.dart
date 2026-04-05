@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../services/bucket_service.dart';
 import '../services/database_service.dart';
 import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
@@ -144,7 +145,7 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: FutureBuilder<Uint8List?>(
-                future: DatabaseService.loadCoverImage(coverUrl),
+                future: BucketService.loadCoverImage(coverUrl),
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data != null) {
                     return Image.memory(
