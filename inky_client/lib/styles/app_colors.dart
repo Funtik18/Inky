@@ -11,7 +11,7 @@ class AppStyles {
   // Text colors
   static const Color textColor = Color(0xFF1C2230);
   static const Color subtitleColor = Color(0xFF5F6B7A);
-  static const Color lightTextColor = Color(0xFFFFFFFF);
+  static const Color textAboveHeaderColor = Color(0xFFFFFFFF);
 
   // UI colors
   static const Color cardColor = Color(0xFFFFFFFF);

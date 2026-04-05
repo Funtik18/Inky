@@ -159,9 +159,9 @@ class _AddBookPageState extends State<AddBookPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Новое произведение', style: TextStyle(color: AppStyles.lightTextColor)),
+        title: const Text('Новое произведение', style: TextStyle(color: AppStyles.textAboveHeaderColor)),
         backgroundColor: AppStyles.headerColor,
-        iconTheme: const IconThemeData(color: AppStyles.lightTextColor),
+        iconTheme: const IconThemeData(color: AppStyles.textAboveHeaderColor),
       ),
       body: SafeArea(
         child: Stack(

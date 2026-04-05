@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
+import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/header_widget.dart';
@@ -61,7 +62,7 @@ class _HomePageState extends State<HomePage> {
             const Text(
               'Имя Фамилия',
               style: TextStyle(
-                color: AppStyles.lightTextColor,
+                color: AppStyles.textAboveHeaderColor,
                 fontSize: 16,
               ),
             ),
@@ -133,7 +134,7 @@ class _HomePageState extends State<HomePage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(6),
               child: Image.asset(
-                'assets/blank.png',
+                AppAssets.blankCover,
                 width: double.infinity,
                 fit: BoxFit.cover,
               ),
