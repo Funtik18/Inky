@@ -85,6 +85,13 @@ class _HomePageState extends State<HomePage> {
           emptyText: 'Пока нет новых поступлений',
           books: books,
         ),
+        const SizedBox(height: 24),
+        _buildBookSection(
+          title: 'Последние обновления',
+          subtitle: 'Новые главы и правки',
+          emptyText: 'Пока нет последних обновлений',
+          books: books,
+        ),
       ],
     );
   }
