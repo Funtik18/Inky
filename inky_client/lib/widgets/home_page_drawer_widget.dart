@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../styles/app_colors.dart';
-import '../widgets/avatar_widget.dart';
-import 'add_book_page.dart';
-import 'my_library_page.dart';
+import 'avatar_widget.dart';
+import '../pages/add_book_page.dart';
+import '../pages/favorites_page.dart';
+import '../pages/my_library_page.dart';
+import '../pages/settings_page.dart';
 
-class HomePageDrawer extends StatelessWidget {
-  const HomePageDrawer({super.key, this.onBookAdded});
+class HomePageDrawerWidget extends StatelessWidget {
+  const HomePageDrawerWidget({super.key, this.onBookAdded});
 
   final VoidCallback? onBookAdded;
 
@@ -49,7 +51,11 @@ class HomePageDrawer extends StatelessWidget {
             leading: const Icon(Icons.favorite),
             title: const Text('Избранное'),
             onTap: () {
-              // Handle favorites tap
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FavoritesPage()),
+              );
             },
           ),
           const Divider(height: 1),
@@ -57,7 +63,11 @@ class HomePageDrawer extends StatelessWidget {
             leading: const Icon(Icons.settings),
             title: const Text('Настройки'),
             onTap: () {
-              // Handle settings tap
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
             },
           ),
           const Divider(height: 1),

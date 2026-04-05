@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../pages/mail_page.dart';
 import '../pages/notification_page.dart';
+import '../pages/search_page.dart';
 import '../styles/app_colors.dart';
 import 'avatar_widget.dart';
 
@@ -20,12 +22,22 @@ class HomePageAppBarWidget extends StatelessWidget
       backgroundColor: AppStyles.headerColor,
       actions: [
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SearchPage()),
+            );
+          },
           icon: const Icon(Icons.search),
           color: AppStyles.textAboveHeaderColor,
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MailPage()),
+            );
+          },
           icon: const Icon(Icons.mail_outline),
           color: AppStyles.textAboveHeaderColor,
         ),
@@ -33,12 +45,11 @@ class HomePageAppBarWidget extends StatelessWidget
           icon: const Icon(Icons.notifications_none),
           color: AppStyles.textAboveHeaderColor,
           onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NotificationPage()),
-              );
-            },
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NotificationPage()),
+            );
+          },
         ),
         Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),

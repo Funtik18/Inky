@@ -4,7 +4,7 @@ import '../services/database_service.dart';
 import '../styles/app_colors.dart';
 import '../widgets/book_card_widget.dart';
 import '../widgets/home_page_app_bar_widget.dart';
-import 'home_page_drawer.dart';
+import '../widgets/home_page_drawer_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: AppStyles.backgroundColor,
       appBar: HomePageAppBarWidget(title: 'Inky'),
       body: _buildBody(),
-      endDrawer: HomePageDrawer(onBookAdded: () => _reloadBooks()),
+      endDrawer: HomePageDrawerWidget(onBookAdded: () => _reloadBooks()),
       drawerEnableOpenDragGesture: true,
       endDrawerEnableOpenDragGesture: true,
     );

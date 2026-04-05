@@ -11,12 +11,11 @@ class NotificationPage extends StatefulWidget {
 }
 
 class _NotificationPageState extends State<NotificationPage> {
-
   @override
   void initState() {
     super.initState();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

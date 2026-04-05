@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../styles/app_colors.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
@@ -8,10 +9,20 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canPop = Navigator.of(context).canPop();
+
     return AppBar(
-        title: Text(title, style: TextStyle(color: AppStyles.textAboveHeaderColor)),
-        backgroundColor: AppStyles.headerColor,
-        iconTheme: const IconThemeData(color: AppStyles.textAboveHeaderColor),
+      automaticallyImplyLeading: canPop,
+      leading: canPop
+          ? IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+              color: AppStyles.textAboveHeaderColor,
+            )
+          : null,
+      title: Text(title, style: const TextStyle(color: AppStyles.textAboveHeaderColor)),
+      backgroundColor: AppStyles.headerColor,
+      iconTheme: const IconThemeData(color: AppStyles.textAboveHeaderColor),
     );
   }
 
