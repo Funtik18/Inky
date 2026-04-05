@@ -6,8 +6,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await DatabaseService.initializeSupabase();
-  var books = await DatabaseService.loadBooks();
-  print(books);
 
   runApp(const MyApp());
 }

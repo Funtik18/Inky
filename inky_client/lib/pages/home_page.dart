@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
+import '../services/database_service.dart';
 import '../styles/app_colors.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/header_widget.dart';
 import 'add_book_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  late Future<List<Map<String, dynamic>>> _booksFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _booksFuture = DatabaseService.loadBooks();
+  }
+
+  void _reloadBooks() {
+    setState(() {
+      _booksFuture = DatabaseService.loadBooks();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +51,6 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.only(right: 16),
               child: AvatarWidget(
                 onTap: () {
-                  print("TODO profile");
                   //TODO: Implement profile tap action
                 },
                 radius: 30,
@@ -52,78 +71,104 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildBody() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: GridView.builder(
-        itemCount: 64,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 5,
-          mainAxisSpacing: 5,
-          childAspectRatio: 0.5,
-        ),
-        itemBuilder: (context, index) {
-          return _buildBookItem(
-            title: 'Book Name',
-            author: 'Author Name',
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _booksFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text('Ошибка загрузки книг: ${snapshot.error}'),
+            ),
           );
-        },
+        }
+
+        final books = snapshot.data ?? [];
+
+        if (books.isEmpty) {
+          return const Center(
+            child: Text('Книг пока нет'),
+          );
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.builder(
+            itemCount: books.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              crossAxisSpacing: 5,
+              mainAxisSpacing: 5,
+              childAspectRatio: 0.5,
+            ),
+            itemBuilder: (context, index) {
+              final book = books[index];
+
+              return _buildBookItem(
+                title: (book['title'] ?? '').toString(),
+                author: (book['author'] ?? '').toString(),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBookItem({required String title, required String author}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: AppStyles.avatarAnonBackgroundColor,
+                borderRadius: BorderRadius.circular(6),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: Text(
+              author,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 12,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
-Widget _buildBookItem({
-  required String title,
-  required String author,
-}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.grey,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppStyles.avatarAnonBackgroundColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: Text(
-            title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Padding(
-          padding: const EdgeInsets.only(left: 8),
-          child: Text(
-            author,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-      ],
-    ),
-  );
-}
 
-Drawer _buildDrawer(BuildContext context) {
+  Drawer _buildDrawer(BuildContext context) {
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -132,12 +177,16 @@ Drawer _buildDrawer(BuildContext context) {
           ListTile(
             leading: const Icon(Icons.add),
             title: const Text('Добавить произведение'),
-            onTap: () {
+            onTap: () async {
               Navigator.of(context).pop();
-              Navigator.push(
+              final wasAdded = await Navigator.push<bool>(
                 context,
                 MaterialPageRoute(builder: (context) => const AddBookPage()),
               );
+
+              if (wasAdded == true) {
+                _reloadBooks();
+              }
             },
           ),
           const Divider(height: 1),
