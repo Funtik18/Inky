@@ -16,18 +16,21 @@ class BucketService {
     return jsonDecode(response.body) as Map<String, dynamic>;
   }*/
 
-  static Future<Uint8List?> loadCoverImage(String coverUrl) async {
+  static final Map<String, Future<Uint8List?>> _coverCache = {};
+
+  static Future<Uint8List?> loadCoverImage(String coverUrl) {
     final normalizedUrl = coverUrl.trim();
     if (normalizedUrl.isEmpty) {
-      return null;
+      return Future.value(null);
     }
 
-    final response = await http.get(Uri.parse(normalizedUrl));
-    if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
-      return null;
-    }
-
-    return response.bodyBytes;
+    return _coverCache.putIfAbsent(normalizedUrl, () async {
+      final response = await http.get(Uri.parse(normalizedUrl));
+      if (response.statusCode != 200 || response.bodyBytes.isEmpty) {
+        return null;
+      }
+      return response.bodyBytes;
+    });
   }
 
   static Future<void> uploadFile({
