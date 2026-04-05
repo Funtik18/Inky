@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../services/bucket_service.dart';
 import '../services/database_service.dart';
-import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
-import '../widgets/header_widget.dart';
+import '../widgets/book_card_widget.dart';
+import '../widgets/app_bar_avatar_widget.dart';
 import 'home_page_drawer.dart';
 
 class HomePage extends StatefulWidget {
@@ -36,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
-      appBar: HeaderWidget(onReload: () => _reloadBooks()),
+      appBar: AppBarAvatarWidget(title: 'Inky'),
       body: _buildBody(),
       endDrawer: HomePageDrawer(onBookAdded: () => _reloadBooks()),
       drawerEnableOpenDragGesture: true,
@@ -84,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                     final book = books[index];
                     return SizedBox(
                       width: 150,
-                      child: _buildBookItem(
+                      child: BookCardWidget(
                         title: (book['title'] ?? '').toString(),
                         author: (book['author'] ?? '').toString(),
                         coverUrl: (book['cover_url'] ?? '').toString(),
@@ -139,81 +137,6 @@ class _HomePageState extends State<HomePage> {
         'Пока нет новых поступлений',
         textAlign: TextAlign.center,
         style: TextStyle(fontSize: 14, color: AppStyles.subtitleColor),
-      ),
-    );
-  }
-
-  Widget _buildBookItem({
-    required String title,
-    required String author,
-    required String coverUrl,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppStyles.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: AppStyles.shadowColor,
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-              child: FutureBuilder<Uint8List?>(
-                future: BucketService.loadCoverImage(coverUrl),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    return Image.memory(
-                      snapshot.data!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    );
-                  }
-
-                  return Image.asset(
-                    AppAssets.blankCover,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
-            child: Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: AppStyles.textColor,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-            child: Text(
-              author,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppStyles.subtitleColor,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

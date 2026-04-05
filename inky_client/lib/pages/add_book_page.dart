@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import '../services/bucket_service.dart';
 import '../services/database_service.dart';
 import '../services/lamda_service.dart';
-import '../styles/app_colors.dart';
 import '../utils/image_utils.dart';
+import '../widgets/app_bar_widget.dart';
 
 class AddBookPage extends StatefulWidget {
   const AddBookPage({super.key});
@@ -158,11 +158,7 @@ class _AddBookPageState extends State<AddBookPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Новое произведение', style: TextStyle(color: AppStyles.textAboveHeaderColor)),
-        backgroundColor: AppStyles.headerColor,
-        iconTheme: const IconThemeData(color: AppStyles.textAboveHeaderColor),
-      ),
+      appBar: AppBarWidget(title: 'Новое произведение'),
       body: SafeArea(
         child: Stack(
           children: [

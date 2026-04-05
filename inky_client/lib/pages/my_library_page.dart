@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../services/bucket_service.dart';
 import '../services/database_service.dart';
-import '../styles/app_assets.dart';
 import '../styles/app_colors.dart';
-import '../widgets/header_widget.dart';
-import 'home_page_drawer.dart';
+import '../widgets/book_card_widget.dart';
+import '../widgets/app_bar_widget.dart';
 
 class MyLibraryPage extends StatefulWidget {
   const MyLibraryPage({super.key});
@@ -57,11 +54,8 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppStyles.backgroundColor,
-      appBar: HeaderWidget(onReload: () => _reloadBooks()),
+      appBar: AppBarWidget(title: 'Моя библиотека'),
       body: _buildBody(),
-      endDrawer: HomePageDrawer(onBookAdded: () => _reloadBooks()),
-      drawerEnableOpenDragGesture: true,
-      endDrawerEnableOpenDragGesture: true,
     );
   }
 
@@ -115,7 +109,7 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
               itemBuilder: (context, index) {
                 final book = books[index];
 
-                return _buildBookItem(
+                return BookCardWidget(
                   title: (book['title'] ?? '').toString(),
                   author: (book['author'] ?? '').toString(),
                   coverUrl: (book['cover_url'] ?? '').toString(),
@@ -125,68 +119,6 @@ class _MyLibraryPageState extends State<MyLibraryPage> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildBookItem({
-    required String title,
-    required String author,
-    required String coverUrl,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppStyles.cardColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: FutureBuilder<Uint8List?>(
-                future: BucketService.loadCoverImage(coverUrl),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data != null) {
-                    return Image.memory(
-                      snapshot.data!,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    );
-                  }
-
-                  return Image.asset(
-                    AppAssets.blankCover,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  );
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Padding(
-            padding: const EdgeInsets.only(left: 8),
-            child: Text(
-              author,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
     );
   }
 }
